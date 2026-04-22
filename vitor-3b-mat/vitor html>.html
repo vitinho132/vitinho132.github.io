@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Carros Premium</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f0f 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #9ca3af;
+            font-size: 1.125rem;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 3rem;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 1rem 1.5rem 1rem 3.5rem;
+            background: rgba(31, 41, 55, 0.5);
+            border: 1px solid #374151;
+            border-radius: 0.75rem;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        #searchInput:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        #searchInput::placeholder {
+            color: #6b7280;
+        }
+
+        .cars-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .car-card {
+            background: rgba(31, 41, 55, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            overflow: hidden;
+            border: 1px solid #374151;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .car-card:hover {
+            border-color: #3b82f6;
+            transform: scale(1.05);
+            box-shadow: 0 20px 60px rgba(59, 130, 246, 0.2);
+        }
+
+        .car-image {
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .car-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .car-info {
+            padding: 1.5rem;
+        }
+
+        .car-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .car-model {
+            color: #60a5fa;
+            font-size: 1.125rem;
+            margin-bottom: 1rem;
+        }
+
+        .car-specs {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .spec-item {
+            display: flex;
+            align-items: center;
+            color: #d1d5db;
+        }
+
+        .spec-icon {
+            margin-right: 0.5rem;
+            color: #60a5fa;
+        }
+
+        .btn-details {
+            width: 100%;
+            padding: 0.75rem;
+            background: #2563eb;
+            border: none;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-details:hover {
+            background: #1d4ed8;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 5rem 0;
+            color: #9ca3af;
+            font-size: 1.25rem;
+            display: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #111827;
+            border-radius: 1rem;
+            max-width: 900px;
+            width: 100%;
+            border: 1px solid #374151;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-image {
+            height: 320px;
+            position: relative;
+        }
+
+        .modal-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .modal-info {
+            padding: 2rem;
+        }
+
+        .modal-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-model {
+            color: #60a5fa;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .spec-detail {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .spec-label {
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+
+        .spec-value {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .spec-price-large {
+            font-size: 1.875rem;
+            color: #10b981;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Catálogo de Carros Premium</h1>
+            <p class="subtitle">Explore os melhores automóveis do mercado</p>
+        </header>
+
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="Pesquisar por marca ou modelo...">
+        </div>
+
+        <div class="cars-grid" id="carsGrid"></div>
+        <div class="no-results" id="noResults">
+            Nenhum carro encontrado. Tente outra pesquisa.
+        </div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-image">
+                <img id="modalImage" src="" alt="">
+                <button class="close-btn" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-info">
+                <h2 class="modal-title" id="modalMarca"></h2>
+                <p class="modal-model" id="modalModelo"></p>
+                <div class="specs-grid" id="modalSpecs"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const carrosData = [
+            {
+                id: 1,
+                marca: "Ferrari",
+                modelo: "F8 Tributo",
+                ano: 2024,
+                potencia: "720 cv",
+                motor: "V8 3.9L Turbo",
+                combustivel: "Gasolina",
+                transmissao: "Automática 7 marchas",
+                aceleracao: "0-100 km/h em 2.9s",
+                velocidadeMaxima: "340 km/h",
+                preco: "R$ 4.500.000",
+                cor: "Vermelho Rosso Corsa",
+                imagem: "https://images.unsplash.com/photo-1592198084033-aade902d1aae?w=800"
+            },
+            {
+                id: 2,
+                marca: "Porsche",
+                modelo: "911 Turbo S",
+                ano: 2024,
+                potencia: "650 cv",
+                motor: "Boxer 6 3.8L Twin-Turbo",
+                combustivel: "Gasolina",
+                transmissao: "PDK 8 marchas",
+                aceleracao: "0-100 km/h em 2.7s",
+                velocidadeMaxima: "330 km/h",
+                preco: "R$ 2.800.000",
+                cor: "Preto Jet",
+                imagem: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800"
+            },
+            {
+                id: 3,
+                marca: "Bugatti",
+                modelo: "Chiron",
+                ano: 2024,
+                potencia: "1500 cv",
+                motor: "W16 8.0L Quad-Turbo",
+                combustivel: "Gasolina",
+                transmissao: "Automática 7 marchas",
+                aceleracao: "0-100 km/h em 2.4s",
+                velocidadeMaxima: "420 km/h",
+                preco: "R$ 18.000.000",
+                cor: "Azul Bugatti",
+                imagem:"imagens/bugatti.jpeg"
+                
+            },
+            {
+                id: 4,
+                marca: "Nissan",
+                modelo: "GT-R R35",
+                ano: 2024,
+                potencia: "565 cv",
+                motor: "V6 3.8L Twin-Turbo",
+                combustivel: "Gasolina",
+                transmissao: "Automática 6 marchas",
+                aceleracao: "0-100 km/h em 2.7s",
+                velocidadeMaxima: "315 km/h",
+                preco: "R$ 1.200.000",
+                cor: "Prata Gun Metallic",
+                imagem: "imagens/gtr-r35.jpeg"
+            }
+        ];
+
+        function renderCars(cars) {
+            const grid = document.getElementById('carsGrid');
+            const noResults = document.getElementById('noResults');
+
+            if (cars.length === 0) {
+                grid.innerHTML = '';
+                noResults.style.display = 'block';
+                return;
+            }
+
+            noResults.style.display = 'none';
+            grid.innerHTML = cars.map(car => `
+                <div class="car-card" onclick="openModal(${car.id})">
+                    <div class="car-image">
+                        <img src="${car.imagem}" alt="${car.marca} ${car.modelo}">
+                    </div>
+                    <div class="car-info">
+                        <h3 class="car-title">${car.marca} ${car.modelo}</h3>
+                        <p class="car-model">${car.modelo}</p>
+                        <div class="car-specs">
+                            <div class="spec-item">
+                                <span class="spec-icon">⚡</span>
+                                <span>${car.potencia}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-icon">📅</span>
+                                <span>${car.ano}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-icon">💰</span>
+                                <span>${car.preco}</span>
+                            </div>
+                        </div>
+                        <button class="btn-details">Ver Detalhes</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openModal(carId) {
+            const car = carrosData.find(c => c.id === carId);
+            if (!car) return;
+
+            document.getElementById('modalImage').src = car.imagem;
+            document.getElementById('modalMarca').textContent = car.marca;
+            document.getElementById('modalModelo').textContent = car.modelo;
+
+            document.getElementById('modalSpecs').innerHTML = `
+                <div class="spec-detail">
+                    <div>
+                        <p class="spec-label">Potência</p>
+                        <p class="spec-value">${car.potencia}</p>
+                    </div>
+                </div>
+                <div class="spec-detail">
+                    <div>
+                        <p class="spec-label">Motor</p>
+                        <p class="spec-value">${car.motor}</p>
+                    </div>
+                </div>
+                <div class="spec-detail">
+                    <div>
+                        <p class="spec-label">Ano</p>
+                        <p class="spec-value">${car.ano}</p>
+                    </div>
+                </div>
+                <div class="spec-detail">
+                    <div>
+                        <p class="spec-label">Combustível</p>
+                        <p class="spec-value">${car.combustivel}</p>
+                    </div>
+                </div>
+                <div class="spec-detail">
+                    <div>
+                        <p class="spec-label">Transmissão</p>
+                        <p class="spec-value">${car.transmissao}</p>
+                    </div>
+                </div>
+                <div class="spec-detail">
+                    <div>
+                        <p class="spec-label">Aceleração</p>
+                        <p class="spec-value">${car.aceleracao}</p>
+                    </div>
+                </div>
+                <div class="spec-detail">
+                    <div>
+                        <p class="spec-label">Velocidade Máxima</p>
+                        <p class="spec-value">${car.velocidadeMaxima}</p>
+                    </div>
+                </div>
+                <div class="spec-detail">
+                    <div>
+                        <p class="spec-label">Cor</p>
+                        <p class="spec-value">${car.cor}</p>
+                    </div>
+                </div>
+                <div class="spec-detail">
+                    <div>
+                        <p class="spec-label">Preço</p>
+                        <p class="spec-value spec-price-large">${car.preco}</p>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const filtered = carrosData.filter(car =>
+                car.marca.toLowerCase().includes(searchTerm) ||
+                car.modelo.toLowerCase().includes(searchTerm)
+            );
+            renderCars(filtered);
+        });
+
+        // Renderizar carros ao carregar a página
+        renderCars(carrosData);
+    </script>
+</body>
+</html>
